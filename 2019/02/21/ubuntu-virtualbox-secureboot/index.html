@@ -3,13 +3,16 @@
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
   
-  <title>ubuntu.virtualbox.secureboot | 김개발의 개발</title>
+  <title>Secure Boot + Ubuntu + VirtualBox = fail | 김개발의 개발</title>
   <meta name="author" content="kimdogfoot">
+  
+  <meta name="description" content="우분투에서 VirtualBox를 돌리려 하면, 설치까지는 잘 되는데 막상 띄울 때 에러가 발생하는 경우가 있다.이는 우분투에서 커널 모듈은 UEFI Secure Boot 에 의해 승인되어야 하기 때문이다.
+일단, BIOS 에서 UEFI Secure Boot 를 끄면 해">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="ubuntu.virtualbox.secureboot">
+  <meta property="og:title" content="Secure Boot + Ubuntu + VirtualBox = fail">
   <meta property="og:site_name" content="김개발의 개발">
 
   
@@ -53,13 +56,28 @@
       
       
   
-    <h1 class="title">ubuntu.virtualbox.secureboot</h1>
+    <h1 class="title">Secure Boot + Ubuntu + VirtualBox = fail</h1>
   
 
     </header>
     <div class="entry">
       
-        
+        <p>우분투에서 VirtualBox를 돌리려 하면, 설치까지는 잘 되는데 막상 띄울 때 에러가 발생하는 경우가 있다.<br>이는 우분투에서 커널 모듈은 UEFI Secure Boot 에 의해 승인되어야 하기 때문이다.</p>
+<p>일단, BIOS 에서 UEFI Secure Boot 를 끄면 해결 될 것 같지만, Secure Boot 가 어디 동네 콤퓨타 수리업체에서 끼워넣은 설정도 아니고.. 방법을 찾다 보니 아래의 방법을 통해 해결할 수 있었다.</p>
+<ul>
+<li>내가 </li>
+</ul>
+<h2 id="1-openssl-을-통해-인증-키-생성"><a href="#1-openssl-을-통해-인증-키-생성" class="headerlink" title="1. openssl 을 통해 인증 키 생성"></a>1. openssl 을 통해 인증 키 생성</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo -i</span><br><span class="line"><span class="meta">#</span> mkdir /root/module-signing</span><br><span class="line"><span class="meta">#</span> cd /root/module-signing</span><br><span class="line"><span class="meta">#</span> openssl req -new -x509 -newkey rsa:2048 -keyout MOK.priv -outform DER -out MOK.der -nodes -days 36500 -subj "/CN=YOUR_NAME/"</span><br><span class="line">[...]</span><br><span class="line"><span class="meta">#</span> chmod 600 MOK.priv</span><br></pre></td></tr></table></figure>
+<h2 id="2-생성된-key-를-등록"><a href="#2-생성된-key-를-등록" class="headerlink" title="2. 생성된 key 를 등록"></a>2. 생성된 key 를 등록</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> mokutil --import /root/module-signing/MOK.der</span><br><span class="line">input password:</span><br><span class="line">input password again:</span><br></pre></td></tr></table></figure>
+<h2 id="3-재시작"><a href="#3-재시작" class="headerlink" title="3. 재시작"></a>3. 재시작</h2><p>재시작 시 MOK 매니저가 암호를 물어보면 위에서 설정한 암호 입력<br>이후 Enroll MOK 를 선택하여 키를 활성황<br>정상적으로 잘 수행되었다면, dmesg 에서 키가 활성화 된 것을 볼 수 있음<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>dmesg|grep 'EFI: Loaded cert'</span><br></pre></td></tr></table></figure></p>
+<h2 id="4-등록된-키로-VirtualBox-모듈을-승인해주는-스크립트-작성-amp-실행"><a href="#4-등록된-키로-VirtualBox-모듈을-승인해주는-스크립트-작성-amp-실행" class="headerlink" title="4. 등록된 키로 VirtualBox 모듈을 승인해주는 스크립트 작성&amp;실행"></a>4. 등록된 키로 VirtualBox 모듈을 승인해주는 스크립트 작성&amp;실행</h2><p>아래 파일을 생성하여 쉘 스크립트 작성<br>/root/module-signing/sign-vbox-modules<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/bash</span><br><span class="line"></span><br><span class="line">for modfile in $(dirname $(modinfo -n vboxdrv))/*.ko; do</span><br><span class="line">  echo "Signing $modfile"</span><br><span class="line">  /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 \</span><br><span class="line">                                /root/module-signing/MOK.priv \</span><br><span class="line">                                /root/module-signing/MOK.der "$modfile"</span><br><span class="line">done</span><br></pre></td></tr></table></figure></p>
+<p>아래 명령어로 실행 권한 넣어주자..<br>chmod 700 /root/module-signing/sign-vbox-modules</p>
+<p>이후 생성한 쉘 파일 실행<br>※ 커널 업데이트가 될 때마다 등록해줘야 한다고 함..</p>
+<h2 id="5-vboxdrv-모듈을-로드"><a href="#5-vboxdrv-모듈을-로드" class="headerlink" title="5. vboxdrv 모듈을 로드"></a>5. vboxdrv 모듈을 로드</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">probe vboxdrv</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>출처 : <a href="https://stegard.net/2016/10/virtualbox-secure-boot-ubuntu-fail/" target="_blank" rel="noopener">VirtualBox + Secure Boot + Ubuntu = fail</a><br>※ 사실, 출처를 번역한 것 정도에 불과하다.. -제대로 했는지도 모르겠지만..-</p>
+</blockquote>
+
       
     </div>
     <footer>
@@ -68,7 +86,7 @@
         
   
   <div class="tags">
-    <a href="/tags/ubuntu/">ubuntu</a>
+    <a href="/tags/ubuntu/">ubuntu</a>, <a href="/tags/virtualbox/">virtualbox</a>, <a href="/tags/sercure-boot/">sercure boot</a>
   </div>
 
         
@@ -132,7 +150,11 @@
   <h3 class="title">Tags</h3>
   <ul class="entry">
   
+    <li><a href="/tags/sercure-boot/">sercure boot</a><small>1</small></li>
+  
     <li><a href="/tags/ubuntu/">ubuntu</a><small>1</small></li>
+  
+    <li><a href="/tags/virtualbox/">virtualbox</a><small>1</small></li>
   
   </ul>
 </div>
