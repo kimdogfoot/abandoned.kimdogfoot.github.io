@@ -7,7 +7,7 @@
   <meta name="author" content="kimdogfoot">
   
   <meta name="description" content="리눅스에서 네트워크 상태를 확인하기 위해 자주 사용하는 커맨드
-h1. Listening portss -tlp-t : TCP 커넥션 보기-l : Listen 중인 것만 보기-p : 프로세스정보까지 보기아래 예제는 4000 포트로 hexo 를 돌리고 있는 내용이 출력된 결">
+Listening port 찾기ss -tlp-t : TCP 커넥션 보기-l : Listen 중인 것만 보기-p : 프로세스정보까지 보기아래 예제는 4000 포트로 hexo 를 돌리고 있는 내용이 출력된 결과">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -63,7 +63,8 @@ h1. Listening portss -tlp-t : TCP 커넥션 보기-l : Listen 중인 것만 보�
     <div class="entry">
       
         <p>리눅스에서 네트워크 상태를 확인하기 위해 자주 사용하는 커맨드</p>
-<p>h1. Listening port<br><em>ss -tlp</em><br>-t : TCP 커넥션 보기<br>-l : Listen 중인 것만 보기<br>-p : 프로세스정보까지 보기<br>아래 예제는 4000 포트로 hexo 를 돌리고 있는 내용이 출력된 결과이다.<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> ss -tlp</span><br><span class="line">tate        Recv-Q        Send-Q                Local Address:Port                 Peer Address:Port</span><br><span class="line">[...]</span><br><span class="line">LISTEN       0             128                               *:4000                            *:*           users:(("hexo",pid=22388,fd=68))   </span><br><span class="line">[...]</span><br></pre></td></tr></table></figure></p>
+<h3 id="Listening-port-찾기"><a href="#Listening-port-찾기" class="headerlink" title="Listening port 찾기"></a>Listening port 찾기</h3><p><strong>ss -tlp</strong><br>-t : TCP 커넥션 보기<br>-l : Listen 중인 것만 보기<br>-p : 프로세스정보까지 보기<br>아래 예제는 4000 포트로 hexo 를 돌리고 있는 내용이 출력된 결과이다.<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> ss -tlp</span><br><span class="line">tate    Recv-Q  Send-Q  Local Address:Port  Peer Address:Port</span><br><span class="line">[...]</span><br><span class="line">LISTEN  0       128     *:4000              *:*                 users:(("hexo",pid=22388,fd=68))   </span><br><span class="line">[...]</span><br></pre></td></tr></table></figure></p>
+<p>pid=22388 인 놈이 4000 port를 사용하고 있는 것을 알 수 있다.<br>※ 이 블로그를 만드는데 사용되는 <a href="https://hexo.io/" target="_blank" rel="noopener">hexo</a>라는 블로그 프레임워크 이다.</p>
 
       
     </div>
