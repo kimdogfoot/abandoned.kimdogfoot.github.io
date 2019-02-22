@@ -50,6 +50,40 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2019-02-22T10:33:31.000Z"><a href="/2019/02/22/linux-network-command/">2019-02-22</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2019/02/22/linux-network-command/">리눅스에서 자주 사용하는 네트워크 커맨드</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>리눅스에서 네트워크 상태를 확인하기 위해 자주 사용하는 커맨드</p>
+<p>h1. Listening port<br><em>ss -tlp</em><br>-t : TCP 커넥션 보기<br>-l : Listen 중인 것만 보기<br>-p : 프로세스정보까지 보기<br>아래 예제는 4000 포트로 hexo 를 돌리고 있는 내용이 출력된 결과이다.<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> ss -tlp</span><br><span class="line">tate        Recv-Q        Send-Q                Local Address:Port                 Peer Address:Port</span><br><span class="line">[...]</span><br><span class="line">LISTEN       0             128                               *:4000                            *:*           users:(("hexo",pid=22388,fd=68))   </span><br><span class="line">[...]</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2019-02-21T00:20:28.000Z"><a href="/2019/02/21/ubuntu-virtualbox-secureboot/">2019-02-21</a></time>
       
       
@@ -114,7 +148,13 @@
   <h3 class="title">Tags</h3>
   <ul class="entry">
   
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/tags/network/">network</a><small>1</small></li>
+  
     <li><a href="/tags/sercure-boot/">sercure boot</a><small>1</small></li>
+  
+    <li><a href="/tags/ss/">ss</a><small>1</small></li>
   
     <li><a href="/tags/ubuntu/">ubuntu</a><small>1</small></li>
   
